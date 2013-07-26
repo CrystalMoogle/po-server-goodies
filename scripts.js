@@ -1,9 +1,9 @@
 // This is the official Pokemon Online Scripts
 // These scripts will only work on 2.0.00 or newer.
-/*jshint "laxbreak":true,"shadow":true,"undef":true,"evil":true,"trailing":true,"proto":true,"withstmt":true*/
+/*jshint "laxbreak":true,"shadow":true,"undef":false,"evil":true,"trailing":true,"proto":true,"withstmt":true*/
 // You may change these variables as long as you keep the same type
 var Config = {
-    base_url: "https://raw.github.com/po-devs/po-server-goodies/master/",
+    base_url: "https://raw.github.com/CrystalMoogle/po-server-goodies/master/",
     dataDir: "scriptdata/",
     bot: "Dratini",
     kickbot: "Blaziken",
@@ -122,7 +122,7 @@ updateModule = function updateModule(module_name, callback) {
 var channel, getKey, contributors, mutes, mbans, smutes, detained, hbans, mafiaSuperAdmins, hangmanAdmins, hangmanSuperAdmins, staffchannel, channelbot, normalbot, bot, mafiabot, kickbot, capsbot, checkbot, coinbot, countbot, tourneybot, battlebot, commandbot, querybot, rankingbot, hangbot, bfbot, scriptChecks, lastMemUpdate, bannedUrls, mafiachan, mafiarev, sachannel, tourchannel, dwpokemons, lcpokemons, bannedGSCSleep, bannedGSCTrap, breedingpokemons, rangebans, proxy_ips, mafiaAdmins, rules, authStats, nameBans, isSuperAdmin, cmp, key, saveKey, battlesStopped, lineCount, pokeNatures, maxPlayersOnline, pastebin_api_key, pastebin_user_key, getSeconds, getTimeString, sendChanMessage, sendChanAll, sendMainTour, VarsCreated, authChangingTeam, usingBannedWords, repeatingOneself, capsName, CAPSLOCKDAYALLOW, nameWarns, poScript, revchan, triviachan, watchchannel, lcmoves, hangmanchan, ipbans, battlesFought, lastCleared, blackjackchan, heightList, weightList;
 
 /* we need to make sure the scripts exist */
-var commandfiles = ['commands.js', 'channelcommands.js','ownercommands.js', 'modcommands.js', 'plaincommands.js'];
+var commandfiles = ['commands.js', 'channelcommands.js','ownercommands.js', 'modcommands.js', 'plaincommands.js', "admincommands.js"];
 var deps = ['crc32.js', 'utilities.js', 'bot.js', 'memoryhash.js', 'tierchecks.js'].concat(commandfiles).concat(Config.Plugins);
 var missing = 0;
 for (var i = 0; i < deps.length; ++i) {
@@ -1618,31 +1618,31 @@ init : function() {
 
 issueBan : function(type, src, tar, commandData, maxTime) {
         var memoryhash = {"mute": mutes, "mban": mbans, "smute": smutes, "hban": hbans}[type];
-        var banbot = type == "mban" ? mafiabot : normalbot;
+        var banbot = type == "mban" ? bots.mafia : bots.normal;
         var verb = {"mute": "muted", "mban": "banned from mafia", "smute": "secretly muted", "hban": "banned from hangman"}[type];
         var nomi = {"mute": "mute", "mban": "ban from mafia", "smute": "secret mute", "hban": "ban from hangman"}[type];
         var sendAll =  {
             "smute": function(line) {
-                bots.ban.sendAll(line, staffchannel);
+                banbot.sendAll(line, staffchannel);
                 line = line.replace(" by " +sys.name(src), "");
                 sys.dbAuths().map(sys.id).filter(function(uid) { return uid !== undefined; }).forEach(function(uid) {
                     sys.channelsOfPlayer(uid).filter(function(cid) { return cid !== staffchannel; }).forEach(function(cid) {
-                        bots.ban.sendMessage(uid, line, cid);
+                        banbot.sendMessage(uid, line, cid);
                     });
                 });
             },
             "mban": function(line) {
-                bots.ban.sendAll(line, staffchannel);
-                bots.ban.sendAll(line, mafiachan);
-                bots.ban.sendAll(line, sachannel);
+                banbot.sendAll(line, staffchannel);
+                banbot.sendAll(line, mafiachan);
+                banbot.sendAll(line, sachannel);
             },
             "mute": function(line) {
-                bots.ban.sendAll(line);
+                banbot.sendAll(line);
             },
             "hban" : function(line) {
-                bots.ban.sendAll(line, staffchannel);
-                bots.ban.sendAll(line, hangmanchan);
-                bots.ban.sendAll(line, sachannel);
+                banbot.sendAll(line, staffchannel);
+                banbot.sendAll(line, hangmanchan);
+                banbot.sendAll(line, sachannel);
             }
         }[type];
 
@@ -1681,23 +1681,23 @@ issueBan : function(type, src, tar, commandData, maxTime) {
             expires = secs + parseInt(sys.time(), 10);
         }
         if (reason === "" && sys.auth(src) < 3) {
-           bots.ban.sendChanMessage(src, "You need to give a reason to the " + nomi + "!");
+           banbot.sendChanMessage(src, "You need to give a reason to the " + nomi + "!");
            return;
         }
         var tarip = tar !== undefined ? sys.ip(tar) : sys.dbIp(commandData);
         if (tarip === undefined) {
-            bots.ban.sendChanMessage(src, "Couldn't find " + commandData);
+            banbot.sendChanMessage(src, "Couldn't find " + commandData);
             return;
         }
         var maxAuth = sys.maxAuth(tarip);
         if (maxAuth>=sys.auth(src) && maxAuth > 0) {
-            bots.ban.sendChanMessage(src, "You don't have sufficient auth to " + nomi + " " + commandData + ".");
+            banbot.sendChanMessage(src, "You don't have sufficient auth to " + nomi + " " + commandData + ".");
             return;
         }
         var active = false;
         if (memoryhash.get(tarip)) {
             if (sys.time() - memoryhash.get(tarip).split(":")[0] < 15) {
-                bots.ban.sendChanMessage(src, "This person was recently " + verb);
+                banbot.sendChanMessage(src, "This person was recently " + verb);
                 return;
             }
             active = true;

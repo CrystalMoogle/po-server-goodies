@@ -1,4 +1,4 @@
-exports.ownerCommands = function(src, command, commandData, tar) {
+exports.ownerCommand = function(src, command, commandData, tar) {
     if (command == "ipban") {
         var subip;
         var comment;
