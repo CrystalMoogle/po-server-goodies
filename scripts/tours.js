@@ -10,7 +10,7 @@ touradmins.json, tastats.json, tourseeds.json, tourhistory.json, tours_cache.jso
 
 /*jshint "laxbreak":true,"shadow":true,"undef":true,"evil":true,"trailing":true,"proto":true,"withstmt":true*/
 /*global script, sys, SESSION, sendChanAll, sendChanHtmlAll, require, Config, module*/
-var tourschan, tourserrchan, tours, tourconfig, tourwinmessages, tourstats, tourwarnings;
+var tourschan, tourserrchan, tours, tourwinmessages, tourstats, tourwarnings;
 
 if (typeof tourschan !== "string") {
     tourschan = sys.channelId("Tournaments");
@@ -746,7 +746,7 @@ function initTours() {
         abstourbreak: parseInt(getConfigValue("tourconfig.txt", "absbreaktime"), 10),
         reminder: parseInt(getConfigValue("tourconfig.txt", "remindertime"), 10),
         channel: "Tournaments",
-        errchannel: "Developer's Den",
+        errchannel: getConfigValue("tourconfig.txt", "errchannel"),
         tourbotcolour: getConfigValue("tourconfig.txt", "tourbotcolour"),
         minpercent: parseFloat(getConfigValue("tourconfig.txt", "minpercent")),
         minplayers: parseInt(getConfigValue("tourconfig.txt", "minplayers"), 10),
@@ -1692,6 +1692,11 @@ function tourCommand(src, command, commandData, channel) {
                     sys.saveVal(configDir+"tourconfig.txt", "remindertime", value);
                     sendAllTourAuth(tourconfig.tourbot+sys.name(src)+" set the reminder time to "+time_handle(tourconfig.reminder));
                     return true;
+                }
+                else if (option == 'errchannel') {
+                    tourserrchan = utilities.get_or_create_channel(value);
+                    tourconfig.errchannel = value;
+                    sys.saveVal(configDir+"tourconfig.txt", "errchannel", value);
                 }
                 else if (option == 'minpercent') {
                     if (!isTourOwner(src)) {
@@ -3964,7 +3969,7 @@ function tourprintbracket(key) {
         }
     }
     catch (err) {
-        sendChanAll("Error in printing the bracket, id "+key+": "+err, tourserrchan);
+        sendChanAll("Error in printing the bracket, id "+key+": "+err + (err.lineNumber ? " on line: " + err.lineNumber : ""), tourserrchan);
     }
 }
 

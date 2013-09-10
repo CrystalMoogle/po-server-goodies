@@ -28,6 +28,10 @@ function mafiaStats() {
         var date = new Date();
         if (date.getUTCMinutes() === 0 && date.getUTCSeconds() === 0) {
             this.saveFile();
+<<<<<<< HEAD
+=======
+            this.compileData();
+>>>>>>> master
         }
     };
     this.saveFile = function () {
@@ -74,17 +78,48 @@ function mafiaStats() {
         else {
             data[theme].gamesPlayed = 1;
         }
+<<<<<<< HEAD
         this.clear();
     };
+=======
+        this.saveHourData();
+        this.clear();
+    };
+    this.saveHourData = function () {
+        var data = this.data,
+            players = this.players;
+        if (!data.hoursData) {
+            data.hoursData = {};
+        }
+        for (var x = 0; x < 24; x++) {
+            if (!data.hoursData[x]) {
+                data.hoursData[x] = {};
+                data.hoursData[x].players = 0;
+                data.hoursData[x].gamesPlayed = 0;
+            }
+        }
+        var date = new Date();
+        data.hoursData[date.getUTCHours()].players += players;
+        data.hoursData[date.getUTCHours()].gamesPlayed += 1;
+    };
+>>>>>>> master
     this.compileData = function () {
         var data = this.data;
         var gamesPlayed = [];
         var keys = Object.keys(data);
         var total = 0;
         for (var x = 0; x < keys.length; x++) {
+<<<<<<< HEAD
             var average = this.getAverage(keys[x]);
             total += data[keys[x]].gamesPlayed;
             gamesPlayed.push([keys[x], data[keys[x]].gamesPlayed, average]);
+=======
+            if (keys[x] !== "hoursData") { //should have really planned ahead...
+                var average = this.getAverage(keys[x]);
+                total += data[keys[x]].gamesPlayed;
+                gamesPlayed.push([keys[x], data[keys[x]].gamesPlayed, average]);
+            }
+>>>>>>> master
         }
         gamesPlayed.sort(function (a, b) {
             return b[1] - a[1];
@@ -99,8 +134,10 @@ function mafiaStats() {
             this.compileWinData(gamesPlayed[x][0]);
         }
         output.push("");
+        output.push(this.compileHourData());
+        output.push("");
         var date = new Date();
-        var current = date.getUTCFullYear() + "-" + ("0" + (date.getUTCMonth() + 1)).slice(-2) + "-" + ("0" + date.getUTCDate()).slice(-2) + " " + ("0" + date.getUTCHours()).slice(-2) + ":" + ("0" + date.getUTCMinutes()).slice(-2) + ":" + ("0" + date.getUTCSeconds()).slice(-2);
+        var current = date.getUTCFullYear() + "-" + ("0" + (date.getUTCMonth() + 1)).slice(-2) + "-" + ("0" + date.getUTCDate()).slice(-2) + " " + ("0" + date.getUTCHours()).slice(-2) + ":" + ("0" + date.getUTCMinutes()).slice(-2) + ":" + ("0" + date.getUTCSeconds()).slice(-2)+ " (UTC)";
         output.push("<i><font size=2>Last Updated: " + current + "</font></i>");
         sys.writeToFile(saveDir + "index.html", template.format("Mafia Stats", output.join("<br>")));
     };
@@ -151,6 +188,14 @@ function mafiaStats() {
             output.push(++count + ": <b>" + totalTeam[x][0] + "</b>. Times Won: " + totalTeam[x][1] + ". Average Players per win " + totalTeam[x][2]);
         }
         sys.writeToFile(saveDir + theme.replace(/\ /g, "_") + "_stats.html", template.format(theme, output.join("<br>")));
+    };
+    this.compileHourData = function () {
+        var hData = this.data.hourData;
+        var output = ["<b><font size=4>*** Games Played and Average Players per hour (UTC) ***</font></b>"];
+        for (var x = 0; x < 24; x++) {
+            output.push("Games Played between " + x + ":00 and " + x + ":59" + hData[x].gamesPlayed + ". Average Players : " + Math.round(hData[x].players / hData[x].gamesPlayed * 100) / 100);
+        }
+        return output;
     };
     this.update = function () {
         var POglobal = SESSION.global();
