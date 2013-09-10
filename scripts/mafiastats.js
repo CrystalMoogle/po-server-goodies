@@ -28,10 +28,7 @@ function mafiaStats() {
         var date = new Date();
         if (date.getUTCMinutes() === 0 && date.getUTCSeconds() === 0) {
             this.saveFile();
-<<<<<<< HEAD
-=======
             this.compileData();
->>>>>>> master
         }
     };
     this.saveFile = function () {
@@ -78,10 +75,6 @@ function mafiaStats() {
         else {
             data[theme].gamesPlayed = 1;
         }
-<<<<<<< HEAD
-        this.clear();
-    };
-=======
         this.saveHourData();
         this.clear();
     };
@@ -102,24 +95,17 @@ function mafiaStats() {
         data.hoursData[date.getUTCHours()].players += players;
         data.hoursData[date.getUTCHours()].gamesPlayed += 1;
     };
->>>>>>> master
     this.compileData = function () {
         var data = this.data;
         var gamesPlayed = [];
         var keys = Object.keys(data);
         var total = 0;
         for (var x = 0; x < keys.length; x++) {
-<<<<<<< HEAD
-            var average = this.getAverage(keys[x]);
-            total += data[keys[x]].gamesPlayed;
-            gamesPlayed.push([keys[x], data[keys[x]].gamesPlayed, average]);
-=======
             if (keys[x] !== "hoursData") { //should have really planned ahead...
                 var average = this.getAverage(keys[x]);
                 total += data[keys[x]].gamesPlayed;
                 gamesPlayed.push([keys[x], data[keys[x]].gamesPlayed, average]);
             }
->>>>>>> master
         }
         gamesPlayed.sort(function (a, b) {
             return b[1] - a[1];
